@@ -9,9 +9,10 @@ using System.Transactions;
 
 namespace Gravity.Logic.Models
 {
+    // representing a body that is NOT affected by gravity, but it still has a gravitational field
     public class StaticBody : Body
     {
-        public StaticBody(double mass, Vector<double> initialPosition) : base(mass, initialPosition) { }
-        public StaticBody(double mass) : base(mass, new Vector<double>(new double[] {0,0})) { }
+        public StaticBody(double mass, Vector2 initialPosition) : base(mass, initialPosition) { }
+        public StaticBody(double mass) : base(mass, new Vector2(0,0)) { }
     }
 }

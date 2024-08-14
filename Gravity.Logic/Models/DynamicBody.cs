@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 
 namespace Gravity.Logic.Models
 {
+    // A class representing a body that is affected by gravity
     public class DynamicBody : Body
     {
-        public Vector<double> CurrentPosition { get; set; }
+        public Vector2 CurrentPosition { get; set; }
 
-        public DynamicBody(double mass, Vector<double> initialPosition) : base(mass, initialPosition) { CurrentPosition = InitialPosition; }
+        public DynamicBody(double mass, Vector2 initialPosition) : base(mass, initialPosition) { CurrentPosition = InitialPosition; }
     }
 }
