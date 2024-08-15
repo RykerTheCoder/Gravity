@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gravity.Logic", "Gravity.Logic\Gravity.Logic.csproj", "{53CA05B1-B076-4084-B3A6-6252B8A667DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gravity.Logic", "Gravity.Logic\Gravity.Logic.csproj", "{53CA05B1-B076-4084-B3A6-6252B8A667DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gravity.Testing", "Gravity.Testing\Gravity.Testing.csproj", "{08DDB96B-AD2D-4A82-BBF4-B05E58AB6600}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gravity.Testing", "Gravity.Testing\Gravity.Testing.csproj", "{08DDB96B-AD2D-4A82-BBF4-B05E58AB6600}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gravity.UI", "Gravity.UI\Gravity.UI.csproj", "{833BD222-BEFE-4D54-9D24-63F5C1AF0B45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{08DDB96B-AD2D-4A82-BBF4-B05E58AB6600}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08DDB96B-AD2D-4A82-BBF4-B05E58AB6600}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08DDB96B-AD2D-4A82-BBF4-B05E58AB6600}.Release|Any CPU.Build.0 = Release|Any CPU
+		{833BD222-BEFE-4D54-9D24-63F5C1AF0B45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{833BD222-BEFE-4D54-9D24-63F5C1AF0B45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{833BD222-BEFE-4D54-9D24-63F5C1AF0B45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{833BD222-BEFE-4D54-9D24-63F5C1AF0B45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
