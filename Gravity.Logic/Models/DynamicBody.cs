@@ -11,8 +11,20 @@ namespace Gravity.Logic.Models
     // A class representing a body that is affected by gravity
     public class DynamicBody : Body
     {
+        private Vector2 _initialPosition;
+        public new Vector2 InitialPosition
+        {
+            set
+            {
+                CurrentPosition = _initialPosition = value;
+            }
+            get
+            {
+                return _initialPosition;
+            }
+        }
         public Vector2 CurrentPosition { get; set; }
 
-        public DynamicBody(double mass, Vector2 initialPosition) : base(mass, initialPosition) { CurrentPosition = InitialPosition; }
+        public DynamicBody(double mass, Vector2 initialPosition){ InitialPosition = initialPosition; Mass = mass; }
     }
 }

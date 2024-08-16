@@ -12,12 +12,6 @@ namespace Gravity.Logic.Models
     public abstract class Body
     {
         public double Mass { get; set; }
-        public Vector2 InitialPosition { get; }
-
-        public Body(double mass, Vector2 initialPosition)
-        {
-            Mass = mass;
-            InitialPosition = initialPosition;
-        }
+        public Vector2 InitialPosition { get; set; }
     }
 }
