@@ -25,7 +25,15 @@ namespace Gravity.Logic.Models
         {
             get { return Vector2.Distance(DynamicObject.CurrentPosition, StaticObject.InitialPosition); }
         }
-        public Vector2 direction { get; } // a direction vector that may or may not be useful
+        public double CurrentSpeed // the current speed of the dynamic body
+        {
+            get { return Math.Sqrt((2 * G * StaticObject.Mass / CurrentDistance) + (2 * C / DynamicObject.Mass)); }
+        }
+        public double CurrentAcceleration // the current acceleraction of the dynamic body
+        {
+            get { return -1 * G * StaticObject.Mass / Math.Pow(CurrentDistance + InitialDistance, 2); }
+        }
+        public double direction { get; } // direction in degrees of the force relative to the dynamic body
 
         // variables that are the same across various methods
         readonly double C;
@@ -35,7 +43,8 @@ namespace Gravity.Logic.Models
         {
             DynamicObject = dynamicObject;
             StaticObject = staticObject;
-            direction = Vector2.Subtract(StaticObject.InitialPosition, DynamicObject.InitialPosition);
+            Vector2 directionVector = Vector2.Subtract(DynamicObject.InitialPosition, StaticObject.InitialPosition);
+            direction = (directionVector.Y < 0 ? -1: 1) * Math.Acos(directionVector.X / Math.Sqrt(Math.Pow(directionVector.Y, 2) + Math.Pow(directionVector.X, 2))) * 180 / Math.PI;
 
             // initialize the constants used in the calculations
             C = (-1 * G * DynamicObject.Mass * StaticObject.Mass) / InitialDistance;

@@ -70,8 +70,8 @@
         <Label Grid.Column="3" Content="Distance:" HorizontalAlignment="Left" Margin="10,199,0,0" Grid.Row="1" VerticalAlignment="Top" Grid.RowSpan="2"/>
         <Label Grid.Column="3" Content="Framerate:" HorizontalAlignment="Left" Margin="10,237,0,0" Grid.Row="1" VerticalAlignment="Top" Grid.RowSpan="2"/>
         <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="61,128,0,0" Grid.Row="1" TextWrapping="Wrap" Text="0 m/s" VerticalAlignment="Top" Grid.RowSpan="2" Name="SpeedText"/>
-        <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="93,23,0,0" Grid.Row="2" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Name="AccelerationText" Width="94"/>
-        <TextBlock Grid.Column="3" HorizontalAlignment="Left" Grid.Row="2" TextWrapping="Wrap" Text="1 m" VerticalAlignment="Top" Margin="73,61,0,0" x:Name="DistanceText" Width="114"/>
-        <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="81,99,0,0" Grid.Row="2" TextWrapping="Wrap" Text="0 fps" VerticalAlignment="Top" x:Name="FramerateText" Width="106"/>
+        <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="93,166,0,0" Grid.Row="1" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Name="AccelerationText" Width="94" Grid.RowSpan="2"/>
+        <TextBlock Grid.Column="3" HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" Text="1 m" VerticalAlignment="Top" Margin="73,204,0,0" x:Name="DistanceText" Width="114" Grid.RowSpan="2"/>
+        <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="81,242,0,0" Grid.Row="1" TextWrapping="Wrap" Text="0 fps" VerticalAlignment="Top" x:Name="FramerateText" Width="106" Grid.RowSpan="2"/>
     </Grid>
 </Window>
