@@ -22,12 +22,12 @@
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Static Body Position" VerticalAlignment="Top" FontSize="18"/>
         <Label Content="X:" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Name="StaticXLabel"/>
         <Label Content="Y:" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" Name="StaticYLabel"/>
-        <TextBox HorizontalAlignment="Left" TextWrapping="Wrap" Text="0" VerticalAlignment="Center" Width="138" Name="StaticX" Margin="36,0,0,0"/>
-        <TextBox HorizontalAlignment="Left" Margin="36,95,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="138" Name="StaticY"/>
+        <TextBox HorizontalAlignment="Left" TextWrapping="Wrap" Text="0" VerticalAlignment="Center" Width="138" Name="StaticXBox" Margin="36,0,0,0"/>
+        <TextBox HorizontalAlignment="Left" Margin="36,95,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="138" Name="StaticYBox"/>
         <Label Content="X:" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Name="DynamicXLabel" Grid.Row="1"/>
-        <TextBox HorizontalAlignment="Left" Margin="41,0,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Center" Width="133" Name="DynamicX" Grid.Row="1"/>
+        <TextBox HorizontalAlignment="Left" Margin="41,0,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Center" Width="133" Name="DynamicXBox" Grid.Row="1"/>
         <Label Content="Y:" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" Name="DynamicYLabel" Grid.Row="1"/>
-        <TextBox HorizontalAlignment="Left" Margin="41,95,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="133" Name="DynamicY" Grid.Row="1"/>
+        <TextBox HorizontalAlignment="Left" Margin="41,95,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="133" Name="DynamicYBox" Grid.Row="1"/>
         <Label HorizontalAlignment="Left" Margin="174,0,0,0" Content="m" VerticalAlignment="Center" Grid.Row="1"/>
         <Label HorizontalAlignment="Left" Margin="174,91,0,0" Content="m" VerticalAlignment="Top" Grid.Row="1"/>
         <Label HorizontalAlignment="Left" Margin="174,0,0,0" Content="m" VerticalAlignment="Center"/>
@@ -36,14 +36,14 @@
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18"><Run Text="Body Masses"/><LineBreak/><Run/></TextBlock>
         <Label Content="Static Body Mass:" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="2" VerticalAlignment="Center"/>
         <Label Content="Dynamic Body Mass:" HorizontalAlignment="Left" Margin="10,91,0,0" Grid.Row="2" VerticalAlignment="Top"/>
-        <TextBox Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="134,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="10,000,000" VerticalAlignment="Center" Width="105" Name="StaticMass"/>
-        <TextBox Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="134,96,0,0" Grid.Row="2" TextWrapping="Wrap" Text="10,000,000" VerticalAlignment="Top" Width="105" Name="DynamicMass"/>
+        <TextBox Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="134,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="10,000,000" VerticalAlignment="Center" Width="105" x:Name="StaticMassBox"/>
+        <TextBox Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="134,96,0,0" Grid.Row="2" TextWrapping="Wrap" Text="10,000,000" VerticalAlignment="Top" Width="105" x:Name="DynamicMassBox"/>
         <Label Content="kg" HorizontalAlignment="Left" Margin="244,0,0,0" Grid.Row="2" VerticalAlignment="Center" Grid.ColumnSpan="2"/>
         <Label Content="kg" HorizontalAlignment="Left" Margin="244,91,0,0" Grid.Row="2" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
         <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="100,15,0,0" Grid.Row="2" TextWrapping="Wrap" Text="Initial Properties" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="134" FontSize="18"/>
         <Label Grid.Column="1" Content="Direction:" HorizontalAlignment="Left" Margin="100,0,0,0" Grid.Row="2" VerticalAlignment="Center"/>
         <Label Grid.Column="1" Content="Time of Collision:" HorizontalAlignment="Left" Margin="100,91,0,0" Grid.Row="2" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-        <TextBlock Grid.Column="1" HorizontalAlignment="Center" Grid.Row="2" TextWrapping="Wrap" Text="0°" VerticalAlignment="Center" Grid.ColumnSpan="2" Width="66" Name="DirectionText"/>
+        <TextBlock Grid.Column="1" HorizontalAlignment="Center" Grid.Row="2" TextWrapping="Wrap" Text="{Binding Path=Direction}" VerticalAlignment="Center" Grid.ColumnSpan="2" Width="66" Name="DirectionText"/>
         <TextBlock Grid.Column="2" HorizontalAlignment="Left" Margin="6,96,0,0" Grid.Row="2" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="79" Name="CollisionTimeText"/>
         <Label Grid.Column="2" Content="Initial Distance:" HorizontalAlignment="Left" Margin="33,0,0,0" Grid.Row="2" VerticalAlignment="Center"/>
         <TextBlock Grid.Column="2" HorizontalAlignment="Left" Margin="128,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="1 m" VerticalAlignment="Center" Width="92" Grid.ColumnSpan="2"/>

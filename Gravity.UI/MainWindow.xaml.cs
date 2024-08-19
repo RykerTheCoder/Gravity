@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Gravity.Logic.Models;
 
 namespace Gravity.UI
 {
@@ -20,9 +21,18 @@ namespace Gravity.UI
     /// </summary>
     public partial class MainWindow : Window
     {
+        GravityCalculator Calculator { get; set; }
         public MainWindow()
         {
             InitializeComponent();
+        }
+        private void Update()
+        {
+
+        }
+        private void CreateCalculator()
+        {
+            
         }
     }
 }
