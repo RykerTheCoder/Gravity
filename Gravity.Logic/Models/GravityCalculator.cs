@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Drawing;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
 
 namespace Gravity.Logic.Models
 {
@@ -14,12 +10,41 @@ namespace Gravity.Logic.Models
     {
         readonly double G = 6.673 * Math.Pow(10, -11); // Gravitational Constant
 
+        // variables that are the same across various methods
+        private double C;
+        private double C1;
+
+        public double Direction { get; private set; } // direction in degrees of the force relative to the dynamic body
+        public double InitialDistance { get; private set; } // the initial distance from the dynamic and static bodies
+        public double TimeOfCollision { get; private set; }
+
+        public delegate void StaticOrDynamicBody_Changed(object sender, EventArgs e); // delegate for event
+        public event StaticOrDynamicBody_Changed OnChange; // event that is raised when the dynamic or static body is changed
+
         // The 2 bodies
-        public DynamicBody DynamicObject { get; } // The body that moves
-        public StaticBody StaticObject { get; } // The body that doesn't move
-        public double InitialDistance // the initial distance from the dynamic and static bodies
+        private DynamicBody _dynamicObject;
+        private StaticBody _staticObject;
+
+        public DynamicBody DynamicObject // The body that moves
         {
-            get { return Vector2.Distance(DynamicObject.InitialPosition, StaticObject.InitialPosition); }
+            get
+            {
+                return _dynamicObject;
+            }
+            set
+            {
+                OnChange?.Invoke(this, new EventArgs());
+                _dynamicObject = value;
+            }
+        } 
+        public StaticBody StaticObject // The body that doesn't move
+        {
+            get { return _staticObject; }
+            set
+            {
+                OnChange?.Invoke(this, new EventArgs());
+                _staticObject = value;
+            }
         }
         public double CurrentDistance // the current distance from the dynamic and static bodies
         {
@@ -33,23 +58,16 @@ namespace Gravity.Logic.Models
         {
             get { return -1 * G * StaticObject.Mass / Math.Pow(CurrentDistance + InitialDistance, 2); }
         }
-        public double direction { get; } // direction in degrees of the force relative to the dynamic body
 
-        // variables that are the same across various methods
-        readonly double C;
-        readonly double C1;
-
-        public GravityCalculator(DynamicBody dynamicObject, StaticBody staticObject)
+        public GravityCalculator(DynamicBody dynamicObject, StaticBody staticObject) //constructor
         {
+            // initialize the bodies
             DynamicObject = dynamicObject;
             StaticObject = staticObject;
-            Vector2 directionVector = Vector2.Subtract(DynamicObject.InitialPosition, StaticObject.InitialPosition);
-            direction = (directionVector.Y < 0 ? -1: 1) * Math.Acos(directionVector.X / Math.Sqrt(Math.Pow(directionVector.Y, 2) + Math.Pow(directionVector.X, 2))) * 180 / Math.PI;
 
-            // initialize the constants used in the calculations
-            C = (-1 * G * DynamicObject.Mass * StaticObject.Mass) / InitialDistance;
-            C1 = -1 / 2D * Math.PI * InitialDistance * Math.Sqrt(-1 / 2D * DynamicObject.Mass / C);
+            On_Changed(this, new EventArgs()); // this method initializes everything while also serving as an event method
 
+            OnChange += new StaticOrDynamicBody_Changed(On_Changed); // connect the method to the event
         }
 
         // calculates the position of the dynamic body after the specified amount of time.
@@ -94,9 +112,25 @@ namespace Gravity.Logic.Models
         public double CalculateTime(double displacement)
         {
             double repeatedTerm = InitialDistance / displacement; // a term that is repeated throughout the calculation
-            double coefficient = -1D * InitialDistance / Math.Sqrt(-2D * C / DynamicObject.Mass); // a coefficient to a large term in the next calculation
+            double coefficient = -1 * InitialDistance / Math.Sqrt(-2 * C / DynamicObject.Mass); // a coefficient to a large term in the next calculation
 
             return coefficient * (-1 * Math.Sqrt((1D - 1D / repeatedTerm) / repeatedTerm) + Math.Asin(1 / Math.Sqrt(repeatedTerm))) - C1; // calculate time
+        }
+        private void On_Changed(object sender, EventArgs e) // method invoked when OnChange is raised
+        {
+            // update direction
+            Vector2 directionVector = Vector2.Subtract(DynamicObject.InitialPosition, StaticObject.InitialPosition);
+            Direction = (directionVector.Y < 0 ? -1 : 1) * Math.Acos(directionVector.X / Math.Sqrt(Math.Pow(directionVector.Y, 2) + Math.Pow(directionVector.X, 2))) * 180 / Math.PI;
+
+            // update initial distance
+            InitialDistance = Vector2.Distance(DynamicObject.InitialPosition, StaticObject.InitialPosition);
+
+            // update constants
+            C = (-1 * G * DynamicObject.Mass * StaticObject.Mass) / InitialDistance;
+            C1 = -1 / 2D * Math.PI * InitialDistance * Math.Sqrt(-1 / 2D * DynamicObject.Mass / C);
+
+            // update time of collision
+            TimeOfCollision = C1;
         }
     }
 }

@@ -46,7 +46,7 @@
         <TextBlock Grid.Column="1" HorizontalAlignment="Center" Grid.Row="2" TextWrapping="Wrap" Text="{Binding Path=Direction}" VerticalAlignment="Center" Grid.ColumnSpan="2" Width="66" Name="DirectionText"/>
         <TextBlock Grid.Column="2" HorizontalAlignment="Left" Margin="6,96,0,0" Grid.Row="2" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="79" Name="CollisionTimeText"/>
         <Label Grid.Column="2" Content="Initial Distance:" HorizontalAlignment="Left" Margin="33,0,0,0" Grid.Row="2" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="2" HorizontalAlignment="Left" Margin="128,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="1 m" VerticalAlignment="Center" Width="92" Grid.ColumnSpan="2"/>
+        <TextBlock x:Name="InitialDistanceText" Grid.Column="2" HorizontalAlignment="Left" Margin="128,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="1 m" VerticalAlignment="Center" Width="92" Grid.ColumnSpan="2"/>
         <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.152,0.748" FontSize="18" Height="22" Width="99"><Run Text="Simulation"/><LineBreak/><Run/></TextBlock>
         <Button Grid.Column="3" Content="Run Simulation" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Background="#FF58C755" Name="RunButton"/>
         <Button Grid.Column="3" Content="End" HorizontalAlignment="Left" Margin="140,0,0,0" VerticalAlignment="Center" Background="#FFF55C5C" Name="EndButton"/>
