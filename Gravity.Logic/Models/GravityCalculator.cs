@@ -33,7 +33,7 @@ namespace Gravity.Logic.Models
             }
             set
             {
-                OnChange?.Invoke(this, new EventArgs());
+                Changed(this, EventArgs.Empty);
                 _dynamicObject = value;
             }
         } 
@@ -42,7 +42,7 @@ namespace Gravity.Logic.Models
             get { return _staticObject; }
             set
             {
-                OnChange?.Invoke(this, new EventArgs());
+                Changed(this, EventArgs.Empty);
                 _staticObject = value;
             }
         }
@@ -65,9 +65,10 @@ namespace Gravity.Logic.Models
             DynamicObject = dynamicObject;
             StaticObject = staticObject;
 
-            On_Changed(this, new EventArgs()); // this method initializes everything while also serving as an event method
-
-            OnChange += new StaticOrDynamicBody_Changed(On_Changed); // connect the method to the event
+            DynamicObject.OnChange += Changed; // connect the method to the event
+            StaticObject.OnChange += Changed;
+            OnChange += On_Changed;
+            OnChange?.Invoke(this, new EventArgs()); // initialize all properties and variables
         }
 
         // calculates the position of the dynamic body after the specified amount of time.
@@ -130,7 +131,11 @@ namespace Gravity.Logic.Models
             C1 = -1 / 2D * Math.PI * InitialDistance * Math.Sqrt(-1 / 2D * DynamicObject.Mass / C);
 
             // update time of collision
-            TimeOfCollision = C1;
+            TimeOfCollision = -C1;
+        }
+        private void Changed(object sender, EventArgs e)
+        {
+            OnChange?.Invoke(this, EventArgs.Empty);
         }
     }
 }
