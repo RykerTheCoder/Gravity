@@ -23,6 +23,11 @@ namespace Gravity.UI
     public partial class MainWindow : Window
     {
         GravityCalculator Calculator { get; set; }
+        private enum State
+        {
+            Running, Paused, Stopped
+        }
+        private State SimulationState { get; set; }
         public MainWindow()
         {
             InitializeComponent();
@@ -56,17 +61,18 @@ namespace Gravity.UI
         {
 
             DirectionText.Text = $"{Calculator.Direction:F4}\u00B0";
-            InitialDistanceText.Text = $"{Calculator.InitialDistance:F4} m";
+            InitialDistanceText.Text = $"{Calculator.InitialDistance:N2} m";
             CollisionTimeText.Text = FormatTime(Calculator.TimeOfCollision);
+            AccelerationText.Text = Calculator.CurrentAcceleration.ToString("N4") + " m/s/s";
         }
         public static string FormatTime(double seconds)
         {
             int mSeconds = (int)Math.Truncate(seconds * 1000); // convert seconds to milliseconds
             var span = new TimeSpan(0, 0, 0, 0, mSeconds); // create timespan object
 
-            return $"{(span.Days != 0 ? span.Days + " days, " : "") + (span.Hours != 0 ? span.Hours + " hrs, " : "")}" +
-                $"{(span.Minutes != 0 ? span.Minutes + " min, " : "") + (span.Seconds != 0 ? span.Seconds + " sec, " : "")}" +
-                $"{span.Milliseconds} ms"; // return formatted string
+            return $"{(span.Days != 0 ? span.Days.ToString("N0") + " days, " : "") + (span.Hours != 0 ? span.Hours.ToString("N0") + " hrs, " : "")}" +
+                $"{(span.Minutes != 0 ? span.Minutes.ToString("N0") + " min, " : "") + (span.Seconds != 0 ? span.Seconds.ToString("N0") + " sec, " : "")}" +
+                $"{span.Milliseconds.ToString("N0")} ms"; // return formatted string
         }
 
         private void On_TextChanged(object sender, TextChangedEventArgs e)
@@ -76,30 +82,77 @@ namespace Gravity.UI
                 var staticPosition = Calculator.StaticObject.InitialPosition;
                 var dynamicPosition = Calculator.DynamicObject.InitialPosition;
                 TextBox textBox = sender as TextBox;
+                var input = textBox.Text;
 
-                switch (textBox.Name)
+                if (textBox.Text != "")
                 {
-                    case "StaticXBox":
-                        staticPosition.X = float.Parse(textBox.Text);
-                        break;
-                    case "StaticYBox":
-                        staticPosition.Y = float.Parse(textBox.Text);
-                        break;
-                    case "DynamicXBox":
-                        dynamicPosition.X = float.Parse(textBox.Text);
-                        break;
-                    case "DynamicYBox":
-                        dynamicPosition.Y = float.Parse(textBox.Text);
-                        break;
-                    case "StaticMassBox":
-                        Calculator.StaticObject.Mass = double.Parse(textBox.Text);
-                        break;
-                    case "DynamicMassBox":
-                        Calculator.DynamicObject.Mass = double.Parse(textBox.Text);
-                        break;
+                    switch (textBox.Name)
+                    {
+                        case "StaticXBox":
+                            staticPosition.X = float.Parse(input);
+                            break;
+                        case "StaticYBox":
+                            staticPosition.Y = float.Parse(input);
+                            break;
+                        case "DynamicXBox":
+                            dynamicPosition.X = float.Parse(input);
+                            break;
+                        case "DynamicYBox":
+                            dynamicPosition.Y = float.Parse(input);
+                            break;
+                        case "StaticMassBox":
+                            Calculator.StaticObject.Mass = double.Parse(input);
+                            break;
+                        case "DynamicMassBox":
+                            Calculator.DynamicObject.Mass = double.Parse(input);
+                            break;
+                    }
+                    Calculator.DynamicObject.InitialPosition = dynamicPosition;
+                    Calculator.StaticObject.InitialPosition = staticPosition;
                 }
-                Calculator.DynamicObject.InitialPosition = dynamicPosition;
-                Calculator.StaticObject.InitialPosition = staticPosition;
+            }
+        }
+
+        private void On_FocusLost(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            var textBox = sender as TextBox;
+            switch (textBox.Name)
+            {
+                case "StaticXBox":
+                    StaticXBox.Text = Calculator.StaticObject.InitialPosition.X.ToString();
+                    break;
+                case "StaticYBox":
+                    StaticYBox.Text = Calculator.StaticObject.InitialPosition.Y.ToString();
+                    break;
+                case "DynamicXBox":
+                    DynamicXBox.Text = Calculator.DynamicObject.InitialPosition.X.ToString();
+                    break;
+                case "DynamicYBox":
+                    DynamicYBox.Text = Calculator.DynamicObject.InitialPosition.Y.ToString();
+                    break;
+                case "StaticMassBox":
+                    StaticMassBox.Text = Calculator.StaticObject.Mass.ToString();
+                    break;
+                case "DynamicMassBox":
+                    DynamicMassBox.Text = Calculator.DynamicObject.Mass.ToString();
+                    break;
+                case "TimeSkipTextBox":
+                    if(TimeSkipTextBox.Text == "")
+                    {
+                        TimeSkipTextBox.Text = "0";
+                    }
+                    break;
+            }
+        }
+
+        private async void RunButton_Click(object sender, RoutedEventArgs e)
+        {
+            SimulationState = State.Running;
+            double time = 0;
+            while (SimulationState == State.Running)
+            {
+                
+                await Task.Run(() => Calculator.CalculatePoint(time, 4));
             }
         }
     }

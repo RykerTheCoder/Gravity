@@ -56,7 +56,7 @@ namespace Gravity.Logic.Models
         }
         public double CurrentAcceleration // the current acceleraction of the dynamic body
         {
-            get { return -1 * G * StaticObject.Mass / Math.Pow(CurrentDistance + InitialDistance, 2); }
+            get { return G * StaticObject.Mass / Math.Pow(CurrentDistance + InitialDistance, 2); }
         }
 
         public GravityCalculator(DynamicBody dynamicObject, StaticBody staticObject) //constructor
