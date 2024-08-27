@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,9 +35,48 @@ namespace Gravity.UI
             CreateCalculator();
             Calculator.OnChange += On_BodyChanged;
         }
-        private void Update()
+        private void Run()
         {
+            SimulationState = State.Running;
+            double time = 0;
 
+            while (SimulationState == State.Running)
+            {
+                DateTime start = DateTime.Now;
+                Vector2 position = Calculator.CalculatePoint(time, 4);
+                string timeString = FormatTime(time);
+                string positionString = $"({position.X:N4} m, {position.Y:N4} m";
+                string speedString = $"{Calculator.CurrentSpeed:N4} m/s";
+                string accelerationString = $"{Calculator.CurrentAcceleration:N4} m/s/s";
+                string distanceString = $"{Calculator.CurrentDistance:N2} m";
+                DateTime end = DateTime.Now;
+
+                double totalSeconds = (end - start).TotalSeconds;
+                double tickRate = 1 / totalSeconds;
+                if (tickRate > 60)
+                {
+                    Thread.Sleep((int)((1D/60D - totalSeconds) * 1000));
+                    tickRate = 60;
+                }
+                string fpsString = $"{tickRate:F2} fps";
+                time += 1 / tickRate;
+                Application.Current.Dispatcher.Invoke(() => UpdateGUI(timeString, positionString, speedString, accelerationString, distanceString, fpsString));
+            }
+        }
+        private void UpdateGUI(string time, string position, string speed, string acceleration, string distance, string framerate)
+        {
+            TimeText.Text = time;
+            PositionText.Text = position;
+            SpeedText.Text = speed;
+            AccelerationText.Text = acceleration;
+            DistanceText.Text = distance;
+            FramerateText.Text = framerate;
+            TimeText.Text = time;
+            PositionText.Text = position;
+            SpeedText.Text = speed;
+            AccelerationText.Text = acceleration;
+            DistanceText.Text = distance;
+            FramerateText.Text = framerate;
         }
         private void CreateCalculator()
         {
@@ -61,8 +101,9 @@ namespace Gravity.UI
         {
 
             DirectionText.Text = $"{Calculator.Direction:F4}\u00B0";
-            InitialDistanceText.Text = $"{Calculator.InitialDistance:N2} m";
+            InitialDistanceText.Text = DistanceText.Text = $"{Calculator.InitialDistance:N4} m";
             CollisionTimeText.Text = FormatTime(Calculator.TimeOfCollision);
+            PositionText.Text = $"({Calculator.DynamicObject.CurrentPosition.X:N4} m, {Calculator.DynamicObject.CurrentPosition.Y:N4} m)";
             AccelerationText.Text = Calculator.CurrentAcceleration.ToString("N4") + " m/s/s";
         }
         public static string FormatTime(double seconds)
@@ -147,13 +188,7 @@ namespace Gravity.UI
 
         private async void RunButton_Click(object sender, RoutedEventArgs e)
         {
-            SimulationState = State.Running;
-            double time = 0;
-            while (SimulationState == State.Running)
-            {
-                
-                await Task.Run(() => Calculator.CalculatePoint(time, 4));
-            }
+            await Task.Run(() => Run());
         }
     }
 }
