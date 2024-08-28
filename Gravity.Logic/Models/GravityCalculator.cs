@@ -56,7 +56,7 @@ namespace Gravity.Logic.Models
         }
         public double CurrentAcceleration // the current acceleraction of the dynamic body
         {
-            get { return G * StaticObject.Mass / Math.Pow(CurrentDistance + InitialDistance, 2); }
+            get { return G * StaticObject.Mass / Math.Pow(CurrentDistance, 2); }
         }
 
         public GravityCalculator(DynamicBody dynamicObject, StaticBody staticObject) //constructor
@@ -78,7 +78,7 @@ namespace Gravity.Logic.Models
         {
             double desiredValue = 2 * (time + C1) * Math.Sqrt(-2 * C / DynamicObject.Mass) / InitialDistance; // the value that inputValue + sin(inputValue) needs to equal
             double inputValue = desiredValue; // initialize inputValue with desiredValue (desiredValue should be within 1 meter of the wanted inputValue because of the way the graph increases)
-            double resultantValue = 0; // the value of inputValue - sin(inputValue)
+            double resultantValue = inputValue - Math.Sin(inputValue); ; // the value of inputValue - sin(inputValue)
             int Count = 0; // how many times the loop has iterated
 
             // This loop uses the binary search algorithm but on the mathematical function x - sin(x)
