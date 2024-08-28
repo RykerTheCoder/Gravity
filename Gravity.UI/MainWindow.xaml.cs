@@ -59,29 +59,33 @@ namespace Gravity.UI
         }
         private void Run()
         {
-            while (SimulationState == State.Running)
+            while (SimulationState == State.Running) // when the simulation is running
             {
-                DateTime start = DateTime.Now;
-                Vector2 position = Calculator.CalculatePoint(Time, 4);
+                DateTime start = DateTime.Now; // get time before calculations and rendering
+                Vector2 position = Calculator.CalculatePoint(Time, 4); // calculate the position of the object at the time
+                // format a bunch of strings for the gui which represent their respective values
                 string timeString = FormatTime(Time);
                 string positionString = $"({position.X:N4} m, {position.Y:N4} m";
                 string speedString = $"{Calculator.CurrentSpeed:N4} m/s";
                 string accelerationString = $"{Calculator.CurrentAcceleration:N4} m/s/s";
                 string distanceString = $"{Calculator.CurrentDistance:N2} m";
-                DateTime end = DateTime.Now;
+                DateTime end = DateTime.Now; // get time after calculations and rendering
 
-                double totalSeconds = (end - start).TotalSeconds;
-                double tickRate = 1 / totalSeconds;
-                if (tickRate > 60)
+                double totalSeconds = (end - start).TotalSeconds; // total time to do calculations in seconds
+                double tickRate = 1 / totalSeconds; // tickrate aka. fps
+                if (tickRate > 60) // cap the tickRate at 60
                 {
                     Thread.Sleep((int)((1D / 60D - totalSeconds) * 1000));
                     tickRate = 60;
                 }
-                string fpsString = $"{tickRate:F0} fps";
-                Time += 1 / tickRate;
-                if (Time > Calculator.TimeOfCollision)
+
+                string fpsString = $"{tickRate:F0} fps"; // formatted fps string for display
+                Time += 1 / tickRate; 
+
+                if (Time > Calculator.TimeOfCollision) // when the objects go past the collision point
                 {
                     SimulationState = State.Collided;
+                    // update the buttons in a logical way
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         PauseButton.IsEnabled = false;
@@ -91,14 +95,22 @@ namespace Gravity.UI
                         TimeSkipButton.IsEnabled = false;
                     });
                     Time = Calculator.TimeOfCollision;
+                    // calculate and format strings
+                    position = Calculator.CalculatePoint(Time, 4);
+                    timeString = FormatTime(Time);
+                    positionString = $"({position.X:N4} m, {position.Y:N4} m";
+                    speedString = $"{Calculator.CurrentSpeed:N4} m/s";
+                    accelerationString = $"{Calculator.CurrentAcceleration:N4} m/s/s";
+                    distanceString = $"{Calculator.CurrentDistance:N2} m";
                 }
 
-                Application.Current.Dispatcher.Invoke(() => UpdateGUI(timeString, positionString, speedString, accelerationString, distanceString, fpsString));
+                Application.Current.Dispatcher.Invoke(() => UpdateGUI(timeString, positionString, speedString, accelerationString, distanceString, fpsString)); // display new strings on gui
 
             }
         }
         private void UpdateGUI(string time, string position, string speed, string acceleration, string distance, string framerate)
         {
+            //updates simulation status section of the gui
             TimeText.Text = time;
             PositionText.Text = position;
             SpeedText.Text = speed;
@@ -133,53 +145,78 @@ namespace Gravity.UI
         }
         public void On_BodyChanged(object sender, EventArgs e)
         {
+            //called whenever a property of a body gets changed
 
+            //refresh the gui
             DirectionText.Text = $"{Calculator.Direction:F4}\u00B0";
             InitialDistanceText.Text = DistanceText.Text = $"{Calculator.InitialDistance:N2} m";
             CollisionTimeText.Text = FormatTime(Calculator.TimeOfCollision);
             PositionText.Text = $"({Calculator.DynamicObject.CurrentPosition.X:N4} m, {Calculator.DynamicObject.CurrentPosition.Y:N4} m)";
             AccelerationText.Text = Calculator.CurrentAcceleration.ToString("N4") + " m/s/s";
         }
-        public static string FormatTime(double seconds)
+        public static string FormatTime(double time)
         {
-            int mSeconds = (int)Math.Truncate(seconds * 1000); // convert seconds to milliseconds
-            var span = new TimeSpan(0, 0, 0, 0, mSeconds); // create timespan object
+            // formats a time value that is in seconds
 
-            return $"{(span.Days != 0 ? span.Days.ToString("N0") + " days, " : "") + (span.Hours != 0 ? span.Hours.ToString("N0") + " hrs, " : "")}" +
-                $"{(span.Minutes != 0 ? span.Minutes.ToString("N0") + " min, " : "") + (span.Seconds != 0 ? span.Seconds.ToString("N0") + " sec, " : "")}" +
-                $"{span.Milliseconds.ToString("N0")} ms"; // return formatted string
+            // calculations for time
+            double years = Math.Truncate(time / 60D / 60D / 24D / 365D);
+            double days = Math.Truncate((time / 60D / 60D / 24D - years * 365D));
+            double hours = Math.Truncate(time / 60D / 60D - (years * 365D + days) * 24D);
+            double minutes = Math.Truncate(time / 60D - (years * 24D * 365D + days * 24D + hours) * 60D);
+            double seconds = Math.Truncate(time - (years * 60D * 24D * 365D + days * 60D * 24D + hours * 60D + minutes) * 60D);
+            double milliseconds = Math.Truncate((time - years * 60D * 60D * 24D * 365D - days * 60D * 60D * 24D - hours * 60D * 60D - minutes * 60D - seconds) * 1000D);
+
+            if (milliseconds < 0) // throw an exception whenever the accuracy of double makes milliseconds negative
+            {
+                throw new OverflowException("Time is too large.");
+            }
+
+            return $"{(years != 0 ? years.ToString("N0") + " years, ": "")}" +
+                $"{(days != 0 ? days.ToString("N0") + " days, " : "") + (hours != 0 ? hours.ToString("N0") + " hrs, " : "")}" +
+                $"{(minutes != 0 ? minutes.ToString("N0") + " min, " : "") + (seconds != 0 ? seconds.ToString("N0") + " sec, " : "")}" +
+                $"{milliseconds.ToString("N0")} ms"; // return formatted string
         }
         private void On_TextChanged(object sender, TextChangedEventArgs e)
         {
+            // initial value of the property we are changing
+            double initialInput = 0;
             try
             {
                 if (Calculator != null)
                 {
                     var staticPosition = Calculator.StaticObject.InitialPosition;
                     var dynamicPosition = Calculator.DynamicObject.InitialPosition;
+                    // get the textbox that sent the event as well as its text property
                     TextBox textBox = sender as TextBox;
                     var input = textBox.Text;
 
-                    if (textBox.Text != "")
+                    if (textBox.Text != "" && textBox.Text != "-")
                     {
+                        // based on the name of the textbox, change different properties
                         switch (textBox.Name)
                         {
                             case "StaticXBox":
+                                initialInput = staticPosition.X;
                                 staticPosition.X = float.Parse(input);
                                 break;
                             case "StaticYBox":
+                                initialInput = staticPosition.Y;
                                 staticPosition.Y = float.Parse(input);
                                 break;
                             case "DynamicXBox":
+                                initialInput = dynamicPosition.X;
                                 dynamicPosition.X = float.Parse(input);
                                 break;
                             case "DynamicYBox":
+                                initialInput = dynamicPosition.Y;
                                 dynamicPosition.Y = float.Parse(input);
                                 break;
                             case "StaticMassBox":
+                                initialInput = Calculator.StaticObject.Mass;
                                 Calculator.StaticObject.Mass = double.Parse(input);
                                 break;
                             case "DynamicMassBox":
+                                initialInput = Calculator.DynamicObject.Mass;
                                 Calculator.DynamicObject.Mass = double.Parse(input);
                                 break;
                         }
@@ -188,13 +225,44 @@ namespace Gravity.UI
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Invalid input in one or more fields.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (ex is OverflowException) // if the time of collision was too large
+                {
+                    var staticPosition = Calculator.StaticObject.InitialPosition;
+                    var dynamicPosition = Calculator.DynamicObject.InitialPosition;
+
+                    switch ((sender as TextBox).Name) // set the property to the value before this event was called
+                    {
+                        case "StaticXBox":
+                            staticPosition.X = (float)initialInput;
+                            break;
+                        case "StaticYBox":
+                            staticPosition.Y = (float)initialInput;
+                            break;
+                        case "DynamicXBox":
+                            dynamicPosition.X = (float)initialInput;
+                            break;
+                        case "DynamicYBox":
+                            dynamicPosition.Y = (float)initialInput;
+                            break;
+                        case "StaticMassBox":
+                            Calculator.StaticObject.Mass = initialInput;
+                            break;
+                        case "DynamicMassBox":
+                            Calculator.DynamicObject.Mass = initialInput;
+                            break;
+                    }
+                    Calculator.DynamicObject.InitialPosition = dynamicPosition;
+                    Calculator.StaticObject.InitialPosition = staticPosition;
+                }
+
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private void On_FocusLost(object sender, KeyboardFocusChangedEventArgs e)
         {
+            // called to format the string after the user is done typing
             var textBox = sender as TextBox;
             switch (textBox.Name)
             {
@@ -224,9 +292,11 @@ namespace Gravity.UI
                     break;
             }
         }
-        private async void RunButton_Click(object sender, RoutedEventArgs e)
+        private void RunButton_Click(object sender, RoutedEventArgs e)
         {
             SimulationState = State.Running;
+
+            // enable/disable buttons logically
             StaticXBox.IsEnabled = false;
             StaticYBox.IsEnabled = false;
             DynamicXBox.IsEnabled = false;
@@ -238,20 +308,20 @@ namespace Gravity.UI
             TimeSkipButton.IsEnabled = true;
             RunButton.IsEnabled = false;
 
-            SimulationTask = Task.Run(() => Run());
-            await SimulationTask;
+            SimulationTask = Task.Run(() => Run()); // cpu does calculations
         }
         private async void TimeSkipButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                double addTime = 0;
+                double addTime = 0; // time to be added to the current time
                 double timeInput = double.Parse(TimeSkipTextBox.Text);
+
                 if (timeInput < 0)
                 {
                     throw new ArgumentException("Time input cannot be negative");
                 }
-                switch ((TimeUnitCombo.SelectedItem as ComboBoxItem).Name)
+                switch ((TimeUnitCombo.SelectedItem as ComboBoxItem).Name) // change the value of add time depending on what unit the user picked
                 {
                     case "Milliseconds":
                         addTime = double.Parse(TimeSkipTextBox.Text) / 1000D;
@@ -274,8 +344,9 @@ namespace Gravity.UI
                 }
                 if (addTime > Calculator.TimeOfCollision - Time)
                 {
+                    // if the added time will bring the time over the time of collision, then go into the collided state and set the time to be the time of collision
                     SimulationState = State.Collided;
-                    await SimulationTask;
+                    await SimulationTask; // wait for simulation to stop running
                     Time = Calculator.TimeOfCollision;
                     PauseButton.IsEnabled = false;
                     PauseButton.Content = "Pause";
@@ -288,6 +359,7 @@ namespace Gravity.UI
                 {
                     Time += addTime;
                 }
+                // update the gui to reflect the changes
                 Vector2 position = Calculator.CalculatePoint(Time, 4);
                 string timeString = FormatTime(Time);
                 string positionString = $"({position.X:N4} m, {position.Y:N4} m";
@@ -304,18 +376,19 @@ namespace Gravity.UI
         }
         private async void PauseButton_Click(object sender, RoutedEventArgs e)
         {
+            // pause button has 2 functions: pausing when the simulation is running, and resuming when the simulation is paused
             if (SimulationState == State.Running)
             {
                 SimulationState = State.Paused;
                 PauseButton.Content = "Resume";
+                await SimulationTask;
                 FramerateText.Text = "0 fps";
             }
             else
             {
                 SimulationState = State.Running;
                 PauseButton.Content = "Pause";
-                await SimulationTask;
-                SimulationTask = Task.Run(() => Run());
+                SimulationTask = Task.Run(() => Run()); // re run the simulation
             }
         }
         private async void EndButton_Click(object sender, RoutedEventArgs e)
@@ -325,11 +398,12 @@ namespace Gravity.UI
             TimeSkipButton.IsEnabled = true;
 
             SimulationState = State.Stopped;
-            if (SimulationTask != null)
+            if (SimulationTask != null) // when the simulation is running, wait for it to stop
             {
                 await SimulationTask;
             }
-            Time = 0;
+            Time = 0; // reset the time
+            // change gui based on the new time
             Vector2 position = Calculator.CalculatePoint(Time, 4);
             string timeString = FormatTime(Time);
             string positionString = $"({position.X:N4} m, {position.Y:N4} m";
@@ -350,10 +424,14 @@ namespace Gravity.UI
             PauseButton.IsEnabled = false;
             EndButton.IsEnabled = false;
         }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            EndButton_Click(this, new RoutedEventArgs());
+            // if the window closes, then make sure the simulation ends if it is running
+            SimulationState = State.Stopped;
+            if (SimulationTask != null)
+            {
+                await SimulationTask;
+            }
         }
     }
 }
