@@ -153,6 +153,7 @@ namespace Gravity.UI
             CollisionTimeText.Text = FormatTime(Calculator.TimeOfCollision);
             PositionText.Text = $"({Calculator.DynamicObject.CurrentPosition.X:N4} m, {Calculator.DynamicObject.CurrentPosition.Y:N4} m)";
             AccelerationText.Text = Calculator.CurrentAcceleration.ToString("N4") + " m/s/s";
+            Render(Calculator.StaticObject, Calculator.DynamicObject);
         }
         public static string FormatTime(double time)
         {
@@ -432,6 +433,44 @@ namespace Gravity.UI
             {
                 await SimulationTask;
             }
+        }
+        private void Render(StaticBody staticBody, DynamicBody dynamicBody)
+        {
+            GravityCanvas.Children.Clear();
+            double height = GravityCanvas.ActualHeight;
+            double width = GravityCanvas.ActualWidth;
+            double horizontalDistance = height * 1 / Math.Tan(Calculator.Direction);
+            Ellipse dynamicBodyCircle = new Ellipse();
+            Ellipse staticBodyCircle = new Ellipse();
+            dynamicBodyCircle.Width = width * 0.05;
+            dynamicBodyCircle.Height = width * 0.05;
+            dynamicBodyCircle.Fill = Brushes.Orange;
+            dynamicBodyCircle.HorizontalAlignment = HorizontalAlignment.Left;
+            dynamicBodyCircle.VerticalAlignment = VerticalAlignment.Bottom;
+            staticBodyCircle.Width = width * 0.05;
+            staticBodyCircle.Height = width * 0.05;
+            staticBodyCircle.Fill = Brushes.SkyBlue;
+            staticBodyCircle.HorizontalAlignment = HorizontalAlignment.Left;
+            staticBodyCircle.VerticalAlignment = VerticalAlignment.Bottom;
+
+            double tanOfDirection = Math.Tan(Calculator.Direction);
+
+            dynamicBodyCircle.RenderTransform = 
+                (width - height / tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width > width * 0.9 || (width - height / tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width < width * 0.1 ?
+                new TranslateTransform(height * 0.9 - dynamicBodyCircle.Height, (height + width * tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width) :
+                new TranslateTransform((width + height / tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width, height * 0.9 - dynamicBodyCircle.Height);
+
+            staticBodyCircle.RenderTransform =
+                (height - width * tanOfDirection) / 2 - height * 0.1 + dynamicBodyCircle.Height > height * 0.9 || (height - width * tanOfDirection) / 2 - height * 0.1 + dynamicBodyCircle.Height < height * 0.1 ?
+                new TranslateTransform((width + height / tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width, height * 0.9 - dynamicBodyCircle.Height) :
+                new TranslateTransform(width * 0.9 - dynamicBodyCircle.Width, (height + width * tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width);
+
+            GravityCanvas.Children.Add(dynamicBodyCircle);
+            GravityCanvas.Children.Add(staticBodyCircle);
+
+        }
+        private void GravityCanvas_Loaded(object sender, RoutedEventArgs e)
+        {
         }
     }
 }
