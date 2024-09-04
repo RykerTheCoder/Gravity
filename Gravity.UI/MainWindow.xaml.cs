@@ -27,6 +27,7 @@ namespace Gravity.UI
     {
         GravityCalculator Calculator { get; set; }
         private double _time = 0;
+        private double pixelsPerMeter;
         private Task SimulationTask { get; set; }
         public double Time
         {
@@ -62,8 +63,10 @@ namespace Gravity.UI
             while (SimulationState == State.Running) // when the simulation is running
             {
                 DateTime start = DateTime.Now; // get time before calculations and rendering
+                Vector2 startPosition;
                 Vector2 position = Calculator.CalculatePoint(Time, 4); // calculate the position of the object at the time
                 // format a bunch of strings for the gui which represent their respective values
+                Application.Current.Dispatcher.Invoke(() => RenderNext());
                 string timeString = FormatTime(Time);
                 string positionString = $"({position.X:N4} m, {position.Y:N4} m";
                 string speedString = $"{Calculator.CurrentSpeed:N4} m/s";
@@ -80,7 +83,7 @@ namespace Gravity.UI
                 }
 
                 string fpsString = $"{tickRate:F0} fps"; // formatted fps string for display
-                Time += 1 / tickRate; 
+                Time += 1 / tickRate;
 
                 if (Time > Calculator.TimeOfCollision) // when the objects go past the collision point
                 {
@@ -153,7 +156,7 @@ namespace Gravity.UI
             CollisionTimeText.Text = FormatTime(Calculator.TimeOfCollision);
             PositionText.Text = $"({Calculator.DynamicObject.CurrentPosition.X:N4} m, {Calculator.DynamicObject.CurrentPosition.Y:N4} m)";
             AccelerationText.Text = Calculator.CurrentAcceleration.ToString("N4") + " m/s/s";
-            Render(Calculator.StaticObject, Calculator.DynamicObject);
+            RenderInitial();
         }
         public static string FormatTime(double time)
         {
@@ -172,7 +175,7 @@ namespace Gravity.UI
                 throw new OverflowException("Time is too large.");
             }
 
-            return $"{(years != 0 ? years.ToString("N0") + " years, ": "")}" +
+            return $"{(years != 0 ? years.ToString("N0") + " years, " : "")}" +
                 $"{(days != 0 ? days.ToString("N0") + " days, " : "") + (hours != 0 ? hours.ToString("N0") + " hrs, " : "")}" +
                 $"{(minutes != 0 ? minutes.ToString("N0") + " min, " : "") + (seconds != 0 ? seconds.ToString("N0") + " sec, " : "")}" +
                 $"{milliseconds.ToString("N0")} ms"; // return formatted string
@@ -434,43 +437,101 @@ namespace Gravity.UI
                 await SimulationTask;
             }
         }
-        private void Render(StaticBody staticBody, DynamicBody dynamicBody)
+        private void RenderInitial()
         {
-            GravityCanvas.Children.Clear();
-            double height = GravityCanvas.ActualHeight;
-            double width = GravityCanvas.ActualWidth;
-            double horizontalDistance = height * 1 / Math.Tan(Calculator.Direction);
-            Ellipse dynamicBodyCircle = new Ellipse();
-            Ellipse staticBodyCircle = new Ellipse();
-            dynamicBodyCircle.Width = width * 0.05;
-            dynamicBodyCircle.Height = width * 0.05;
-            dynamicBodyCircle.Fill = Brushes.Orange;
-            dynamicBodyCircle.HorizontalAlignment = HorizontalAlignment.Left;
-            dynamicBodyCircle.VerticalAlignment = VerticalAlignment.Bottom;
-            staticBodyCircle.Width = width * 0.05;
-            staticBodyCircle.Height = width * 0.05;
-            staticBodyCircle.Fill = Brushes.SkyBlue;
-            staticBodyCircle.HorizontalAlignment = HorizontalAlignment.Left;
-            staticBodyCircle.VerticalAlignment = VerticalAlignment.Bottom;
+            if (GravityCanvas.IsLoaded)
+            {
+                GravityCanvas.Children.Clear();
+                double height = GravityCanvas.ActualHeight;
+                double width = GravityCanvas.ActualWidth;
+                double margin = 10;
+                double angle = -Calculator.Direction * Math.PI / 180D; // convert to radians
+                Ellipse dynamicBodyCircle = new Ellipse();
+                Ellipse staticBodyCircle = new Ellipse();
+                dynamicBodyCircle.Width = width * 0.05;
+                dynamicBodyCircle.Height = width * 0.05;
+                dynamicBodyCircle.Fill = Brushes.Orange;
+                dynamicBodyCircle.HorizontalAlignment = HorizontalAlignment.Left;
+                dynamicBodyCircle.VerticalAlignment = VerticalAlignment.Bottom;
+                staticBodyCircle.Width = width * 0.05;
+                staticBodyCircle.Height = width * 0.05;
+                staticBodyCircle.Fill = Brushes.SkyBlue;
+                staticBodyCircle.HorizontalAlignment = HorizontalAlignment.Left;
+                staticBodyCircle.VerticalAlignment = VerticalAlignment.Bottom;
 
-            double tanOfDirection = Math.Tan(Calculator.Direction);
+                height = height - width * 0.05 - 2D * margin;
+                width = width - width * 0.05 - 2D * margin;
 
-            dynamicBodyCircle.RenderTransform = 
-                (width - height / tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width > width * 0.9 || (width - height / tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width < width * 0.1 ?
-                new TranslateTransform(height * 0.9 - dynamicBodyCircle.Height, (height + width * tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width) :
-                new TranslateTransform((width + height / tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width, height * 0.9 - dynamicBodyCircle.Height);
+                double arcTan = Math.Atan(height / width);
+                double sign = Math.Sign(WaveThingy(angle, height, width)) == 0 ? 1 : Math.Sign(WaveThingy(angle, height, width));
 
-            staticBodyCircle.RenderTransform =
-                (height - width * tanOfDirection) / 2 - height * 0.1 + dynamicBodyCircle.Height > height * 0.9 || (height - width * tanOfDirection) / 2 - height * 0.1 + dynamicBodyCircle.Height < height * 0.1 ?
-                new TranslateTransform((width + height / tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width, height * 0.9 - dynamicBodyCircle.Height) :
-                new TranslateTransform(width * 0.9 - dynamicBodyCircle.Width, (height + width * tanOfDirection) / 2 - width * 0.1 + dynamicBodyCircle.Width);
+                double y = Math.Sign(angle) * (sign == -1 ? height / 2D : width / 2D * Math.Pow(Math.Tan(2 * arcTan * Math.Acos(Math.Abs(WaveThingy(angle, height, width))) / Math.PI), sign));
+                double x = Math.Sign(Math.Cos(angle)) * (sign == 1 ? width / 2D : height / 2D * Math.Pow(Math.Tan((Math.PI - 2 * arcTan) * Math.Acos(Math.Abs(WaveThingy(angle, height, width))) / Math.PI), -sign));
 
-            GravityCanvas.Children.Add(dynamicBodyCircle);
-            GravityCanvas.Children.Add(staticBodyCircle);
+                Vector2 staticBodyPos = new Vector2((float)(width / 2D - x + margin), (float)(height / 2D - y + margin));
+                Vector2 dynamicBodyPos = new Vector2((float)(width / 2D + x + margin), (float)(height / 2D + y + margin));
+                pixelsPerMeter = Vector2.Distance(staticBodyPos, dynamicBodyPos) / Calculator.InitialDistance;
 
+                staticBodyCircle.RenderTransform = new TranslateTransform(width / 2D - x + margin, height / 2D - y + margin);
+                dynamicBodyCircle.RenderTransform = new TranslateTransform(width / 2D + x + margin, height / 2D + y + margin);
+                
+               
+                GravityCanvas.Children.Add(dynamicBodyCircle);
+                GravityCanvas.Children.Add(staticBodyCircle);
+            }
+        }
+        private void RenderNext()
+        {
+            foreach (var element in GravityCanvas.Children)
+            {
+                Ellipse ellipse = element as Ellipse;
+                if (ellipse.Fill == Brushes.Orange)
+                {
+                    Vector2 displacement = Calculator.DynamicObject.InitialPosition - Calculator.DynamicObject.CurrentPosition;
+                    Matrix initialTransform = ellipse.RenderTransform.Value;
+                    initialTransform.OffsetX += displacement.X * pixelsPerMeter;
+                    initialTransform.OffsetY += displacement.Y * pixelsPerMeter;
+                    ellipse.RenderTransform = new TranslateTransform(initialTransform.OffsetX, initialTransform.OffsetY);
+                }
+            }
+        }
+        private double WaveThingy(double angle, double height, double width)
+        {
+            double arcTan = Math.Atan(height / width);
+            double absAngle = Math.Abs(angle);
+
+            if (absAngle <= arcTan)
+            {
+                return Math.Cos(Math.PI * absAngle / (2D * arcTan));
+            }
+            else if (absAngle <= Math.PI - arcTan)
+            {
+                return Math.Cos(Math.PI * (absAngle - 3D * Math.PI / 2D + 2D * arcTan) / (Math.PI - 2D * arcTan));
+            }
+            else if (absAngle <= Math.PI + arcTan)
+            {
+                return Math.Cos(Math.PI * (absAngle - Math.PI) / (2D * arcTan));
+            }
+            else if (absAngle <= 2D * Math.PI - arcTan)
+            {
+                return Math.Cos(Math.PI * (absAngle - 3D * (3D * Math.PI / 2D - 2D * arcTan)) / (Math.PI - 2D * arcTan));
+            }
+            else
+            {
+                return Math.Cos(Math.PI * (absAngle - 2D * Math.PI) / (2D * arcTan));
+            }
         }
         private void GravityCanvas_Loaded(object sender, RoutedEventArgs e)
         {
+            RenderInitial();
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if(SimulationState == State.Stopped)
+            {
+                RenderInitial();
+            }
         }
     }
 }

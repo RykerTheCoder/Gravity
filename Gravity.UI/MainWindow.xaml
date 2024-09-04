@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Gravity.UI"
         mc:Ignorable="d"
-        Title="Gravity Calculator" Height="450" Width="800" Closing="Window_Closing">
+        Title="Gravity Calculator" Height="450" Width="800" Closing="Window_Closing" SizeChanged="Window_SizeChanged">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -48,9 +48,9 @@
         <Label Grid.Column="2" Content="Initial Distance:" HorizontalAlignment="Left" Margin="33,61,0,0" Grid.Row="2" VerticalAlignment="Top"/>
         <TextBlock x:Name="InitialDistanceText" Grid.Column="2" HorizontalAlignment="Left" Margin="128,66,0,0" Grid.Row="2" TextWrapping="Wrap" Text="1 m" VerticalAlignment="Top" Width="82" Grid.ColumnSpan="2"/>
         <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.152,0.748" FontSize="18" Height="22" Width="99"><Run Text="Simulation"/><LineBreak/><Run/></TextBlock>
-        <Button Grid.Column="3" Content="Run Simulation" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Background="#FF58C755" Name="RunButton" TabIndex="7" Click="RunButton_Click"/>
-        <Button Grid.Column="3" Content="End" HorizontalAlignment="Left" Margin="151,0,0,0" VerticalAlignment="Center" Background="#FFF55C5C" Name="EndButton" TabIndex="9" Click="EndButton_Click" IsEnabled="False"/>
-        <Button Grid.Column="3" Content="Pause" HorizontalAlignment="Left" Margin="100,0,0,0" VerticalAlignment="Center" Name="PauseButton" TabIndex="8" Click="PauseButton_Click" IsEnabled="False" Width="46"/>
+        <Button Grid.Column="3" Content="Run Simulation" HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top" Background="#FF58C755" Name="RunButton" TabIndex="7" Click="RunButton_Click"/>
+        <Button Grid.Column="3" Content="End" HorizontalAlignment="Left" Margin="153,61,0,0" VerticalAlignment="Top" Background="#FFF55C5C" Name="EndButton" TabIndex="9" Click="EndButton_Click" IsEnabled="False"/>
+        <Button Grid.Column="3" Content="Pause" HorizontalAlignment="Left" Margin="100,61,0,0" VerticalAlignment="Top" Name="PauseButton" TabIndex="8" Click="PauseButton_Click" IsEnabled="False" Width="46"/>
         <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Status" VerticalAlignment="Top" FontSize="18"/>
         <Button x:Name="TimeSkipButton" Grid.Column="3" Content="Skip Ahead" HorizontalAlignment="Left" Margin="10,104,0,0" VerticalAlignment="Top" Background="#FFDEC4FF" TabIndex="12" Click="TimeSkipButton_Click"/>
         <TextBox Grid.Column="3" HorizontalAlignment="Left" Margin="85,105,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="50" Name="TimeSkipTextBox" TabIndex="11" LostKeyboardFocus="On_FocusLost"/>
