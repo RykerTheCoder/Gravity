@@ -27,7 +27,7 @@ namespace Gravity.UI
     {
         GravityCalculator Calculator { get; set; }
         private double _time = 0;
-        private double pixelsPerMeter;
+        private double pixelsPerMeter; // variable that represents the ratio of pixels to meters which is useful for rendering
         private Task SimulationTask { get; set; }
         public double Time
         {
@@ -63,12 +63,12 @@ namespace Gravity.UI
             while (SimulationState == State.Running) // when the simulation is running
             {
                 DateTime start = DateTime.Now; // get time before calculations and rendering
-                Vector2 startPosition;
+                Vector2 startPosition = Calculator.DynamicObject.CurrentPosition;
                 Vector2 position = Calculator.CalculatePoint(Time, 4); // calculate the position of the object at the time
                 // format a bunch of strings for the gui which represent their respective values
-                Application.Current.Dispatcher.Invoke(() => RenderNext());
+                Application.Current.Dispatcher.Invoke(() => RenderNext(startPosition));
                 string timeString = FormatTime(Time);
-                string positionString = $"({position.X:N4} m, {position.Y:N4} m";
+                string positionString = $"({position.X:N4} m, {position.Y:N4} m)";
                 string speedString = $"{Calculator.CurrentSpeed:N4} m/s";
                 string accelerationString = $"{Calculator.CurrentAcceleration:N4} m/s/s";
                 string distanceString = $"{Calculator.CurrentDistance:N2} m";
@@ -350,7 +350,10 @@ namespace Gravity.UI
                 {
                     // if the added time will bring the time over the time of collision, then go into the collided state and set the time to be the time of collision
                     SimulationState = State.Collided;
-                    await SimulationTask; // wait for simulation to stop running
+                    if (SimulationTask != null)
+                    {
+                        await SimulationTask; // wait for simulation to stop running
+                    }
                     Time = Calculator.TimeOfCollision;
                     PauseButton.IsEnabled = false;
                     PauseButton.Content = "Pause";
@@ -364,6 +367,7 @@ namespace Gravity.UI
                     Time += addTime;
                 }
                 // update the gui to reflect the changes
+                Vector2 startPosition = Calculator.DynamicObject.CurrentPosition;
                 Vector2 position = Calculator.CalculatePoint(Time, 4);
                 string timeString = FormatTime(Time);
                 string positionString = $"({position.X:N4} m, {position.Y:N4} m";
@@ -371,6 +375,7 @@ namespace Gravity.UI
                 string accelerationString = $"{Calculator.CurrentAcceleration:N4} m/s/s";
                 string distanceString = $"{Calculator.CurrentDistance:N2} m";
                 UpdateGUI(timeString, positionString, speedString, accelerationString, distanceString, "0 fps");
+                RenderNext(startPosition);
             }
             catch (Exception ex)
             {
@@ -410,13 +415,14 @@ namespace Gravity.UI
             // change gui based on the new time
             Vector2 position = Calculator.CalculatePoint(Time, 4);
             string timeString = FormatTime(Time);
-            string positionString = $"({position.X:N4} m, {position.Y:N4} m";
+            string positionString = $"({position.X:N4} m, {position.Y:N4} m)";
             string speedString = $"{Calculator.CurrentSpeed:N4} m/s";
             string accelerationString = $"{Calculator.CurrentAcceleration:N4} m/s/s";
             string distanceString = $"{Calculator.CurrentDistance:N2} m";
             string fpsString = $"0 fps";
 
             UpdateGUI(timeString, positionString, speedString, accelerationString, distanceString, fpsString);
+            RenderInitial();
 
             StaticXBox.IsEnabled = true;
             StaticYBox.IsEnabled = true;
@@ -439,16 +445,18 @@ namespace Gravity.UI
         }
         private void RenderInitial()
         {
+            // renders the initial frame of the simulation
             if (GravityCanvas.IsLoaded)
             {
                 GravityCanvas.Children.Clear();
                 double height = GravityCanvas.ActualHeight;
                 double width = GravityCanvas.ActualWidth;
-                double margin = 10;
+                double margin = 10; // the distance between the frame and the bodies
                 double angle = -Calculator.Direction * Math.PI / 180D; // convert to radians
+                // the bodies will be circles
                 Ellipse dynamicBodyCircle = new Ellipse();
                 Ellipse staticBodyCircle = new Ellipse();
-                dynamicBodyCircle.Width = width * 0.05;
+                dynamicBodyCircle.Width = width * 0.05; // the circles will be 0.05x the width of the frame
                 dynamicBodyCircle.Height = width * 0.05;
                 dynamicBodyCircle.Fill = Brushes.Orange;
                 dynamicBodyCircle.HorizontalAlignment = HorizontalAlignment.Left;
@@ -459,35 +467,43 @@ namespace Gravity.UI
                 staticBodyCircle.HorizontalAlignment = HorizontalAlignment.Left;
                 staticBodyCircle.VerticalAlignment = VerticalAlignment.Bottom;
 
+                // adjusting the height and width to account for the body sizes and the margin
                 height = height - width * 0.05 - 2D * margin;
                 width = width - width * 0.05 - 2D * margin;
 
+                // 2 terms that are repeatedly used
                 double arcTan = Math.Atan(height / width);
                 double sign = Math.Sign(WaveThingy(angle, height, width)) == 0 ? 1 : Math.Sign(WaveThingy(angle, height, width));
 
+                // these do math stuff that would take a lot of explaining
                 double y = Math.Sign(angle) * (sign == -1 ? height / 2D : width / 2D * Math.Pow(Math.Tan(2 * arcTan * Math.Acos(Math.Abs(WaveThingy(angle, height, width))) / Math.PI), sign));
                 double x = Math.Sign(Math.Cos(angle)) * (sign == 1 ? width / 2D : height / 2D * Math.Pow(Math.Tan((Math.PI - 2 * arcTan) * Math.Acos(Math.Abs(WaveThingy(angle, height, width))) / Math.PI), -sign));
 
+                // position vectors to represent the positions of both bodies in pixels (they account for the fact that they have sizes and the margin) 
                 Vector2 staticBodyPos = new Vector2((float)(width / 2D - x + margin), (float)(height / 2D - y + margin));
                 Vector2 dynamicBodyPos = new Vector2((float)(width / 2D + x + margin), (float)(height / 2D + y + margin));
-                pixelsPerMeter = Vector2.Distance(staticBodyPos, dynamicBodyPos) / Calculator.InitialDistance;
+                pixelsPerMeter = Vector2.Distance(staticBodyPos, dynamicBodyPos) / Calculator.InitialDistance; // pixels divided by meters gives pixels per meter
 
-                staticBodyCircle.RenderTransform = new TranslateTransform(width / 2D - x + margin, height / 2D - y + margin);
-                dynamicBodyCircle.RenderTransform = new TranslateTransform(width / 2D + x + margin, height / 2D + y + margin);
+                // the transformations of the bodies
+                staticBodyCircle.RenderTransform = new TranslateTransform(staticBodyPos.X, staticBodyPos.Y);
+                dynamicBodyCircle.RenderTransform = new TranslateTransform(dynamicBodyPos.X, dynamicBodyPos.Y);
                 
-               
+                // add the bodies to the canvas
                 GravityCanvas.Children.Add(dynamicBodyCircle);
                 GravityCanvas.Children.Add(staticBodyCircle);
             }
         }
-        private void RenderNext()
+        private void RenderNext(Vector2 startPosition)
         {
+            // renders each subsequent frame of the simulation
             foreach (var element in GravityCanvas.Children)
             {
                 Ellipse ellipse = element as Ellipse;
-                if (ellipse.Fill == Brushes.Orange)
+                if (ellipse.Fill == Brushes.Orange) // check if it is the dynamic body
                 {
-                    Vector2 displacement = Calculator.DynamicObject.InitialPosition - Calculator.DynamicObject.CurrentPosition;
+                    // transform the dynamic body visually on the screen
+                    Vector2 newPosition = Calculator.DynamicObject.CurrentPosition;
+                    Vector2 displacement = new Vector2(newPosition.X - startPosition.X, startPosition.Y - newPosition.Y); // had to switch the signs because OffsetY is aligned to the top
                     Matrix initialTransform = ellipse.RenderTransform.Value;
                     initialTransform.OffsetX += displacement.X * pixelsPerMeter;
                     initialTransform.OffsetY += displacement.Y * pixelsPerMeter;
@@ -497,6 +513,7 @@ namespace Gravity.UI
         }
         private double WaveThingy(double angle, double height, double width)
         {
+            // this represents a mathematical piecewise function that is like a multipurpose for a rectangle, it is weird but it works
             double arcTan = Math.Atan(height / width);
             double absAngle = Math.Abs(angle);
 
@@ -523,12 +540,13 @@ namespace Gravity.UI
         }
         private void GravityCanvas_Loaded(object sender, RoutedEventArgs e)
         {
+            // creates the first frame to exist
             RenderInitial();
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if(SimulationState == State.Stopped)
+            if(SimulationState == State.Stopped) // when the simulation is stopped, the simulation will resize when the window is resized
             {
                 RenderInitial();
             }

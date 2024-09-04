@@ -83,9 +83,7 @@ namespace Gravity.Logic.Models
 
             // This loop uses the binary search algorithm but on the mathematical function x - sin(x)
             while (Math.Abs(desiredValue - resultantValue) > Math.Pow(10, -1 * (precision+1)))
-            {
-                resultantValue = inputValue - Math.Sin(inputValue);
-                
+            {            
                 if (resultantValue < desiredValue)
                 {
                     inputValue += Math.Pow(2, -1 * Count);
@@ -98,7 +96,7 @@ namespace Gravity.Logic.Models
                 {
                     break;
                 }
-
+                resultantValue = inputValue - Math.Sin(inputValue);
                 Count++;
             }
 
