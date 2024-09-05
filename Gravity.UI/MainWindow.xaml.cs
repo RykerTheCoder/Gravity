@@ -99,12 +99,23 @@ namespace Gravity.UI
                     });
                     Time = Calculator.TimeOfCollision;
                     // calculate and format strings
+                    startPosition = position;
                     position = Calculator.CalculatePoint(Time, 4);
                     timeString = FormatTime(Time);
                     positionString = $"({position.X:N4} m, {position.Y:N4} m";
                     speedString = $"{Calculator.CurrentSpeed:N4} m/s";
                     accelerationString = $"{Calculator.CurrentAcceleration:N4} m/s/s";
                     distanceString = $"{Calculator.CurrentDistance:N2} m";
+                    // update the GUI to reflect the changes
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        PauseButton.IsEnabled = false;
+                        EndButton.IsEnabled = true;
+                        EndButton.Content = "Reset";
+                        RunButton.IsEnabled = false;
+                        TimeSkipButton.IsEnabled = false;
+                        RenderNext(startPosition);
+                    });
                 }
 
                 Application.Current.Dispatcher.Invoke(() => UpdateGUI(timeString, positionString, speedString, accelerationString, distanceString, fpsString)); // display new strings on gui
@@ -511,7 +522,7 @@ namespace Gravity.UI
                 }
             }
         }
-        private double WaveThingy(double angle, double height, double width)
+        private static double WaveThingy(double angle, double height, double width)
         {
             // this represents a mathematical piecewise function that is like a multipurpose for a rectangle, it is weird but it works
             double arcTan = Math.Atan(height / width);
