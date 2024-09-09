@@ -1,1 +1,1 @@
-To run the program you will want to run Gravity.UI
+Download and extract GravityCalculator.zip and then run Gravity.UI.exe
